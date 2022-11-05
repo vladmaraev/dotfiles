@@ -1,0 +1,399 @@
+(require 'package)
+
+(package-initialize 'noactivate)
+      (eval-when-compile
+        (require 'use-package))
+
+(use-package diminish)
+
+(setq user-full-name "Vladislav Maraev"
+      user-mail-address "vladislav.maraev@gu.se")
+
+(setq custom-file "~/.emacs.d/custom.el")
+(load custom-file t)
+
+(setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
+(setq delete-old-versions -1)
+(setq auto-save-file-name-transforms '((".*" "~/.emacs.d/auto-save-list/" t)))
+(setq auto-save-interval 80)
+
+(setq mac-option-key-is-meta t)
+(setq mac-command-key-is-meta nil)
+(setq mac-command-modifier 'control)
+(setq mac-option-modifier 'meta)
+(setq mac-right-option-modifier nil)
+(setq mac-left-command-modifier nil)
+
+(require 'powerline)
+(setq powerline-default-separator 'slant)
+(setq powerline-display-buffer-size t)
+(setq powerline-display-hud t)
+(setq powerline-gui-use-vcs-glyph nil)
+(remove-hook 'focus-out-hook 'powerline-unset-selected-window) ;; mac hack
+
+
+(require 'dired-x)
+
+(defun finder-here ()
+  (interactive)
+  (dired-smart-shell-command "open -a Finder $PWD" nil nil))
+
+(defun iterm-here ()
+  (interactive)
+  (dired-smart-shell-command "open -a iTerm $PWD" nil nil))
+
+
+(require 'consult)
+(consult-customize
+ consult-line :add-history t)
+
+(use-package boon
+  :diminish boon-local-mode)
+(require 'boon-qwerty)
+(boon-mode)
+(require 'boon-tutorial)
+(require 'boon-powerline)
+(boon-powerline-theme)
+
+;; for keyboard with no ESC
+(define-key boon-command-map "§" 'boon-quit)
+(define-key boon-special-map "§" 'boon-set-command-state)
+(define-key boon-insert-map "§" 'boon-set-command-state)
+(define-key global-map "§" 'keyboard-quit)
+(define-key minibuffer-local-map "§" 'keyboard-quit)
+(define-key minibuffer-local-ns-map "§" 'keyboard-quit)
+(define-key minibuffer-local-completion-map "§" 'keyboard-quit)
+(define-key minibuffer-local-must-match-map "§" 'keyboard-quit)
+(define-key isearch-mode-map "§" 'isearch-abort)
+
+
+(define-key boon-x-map ";" 'boon-toggle-comment)
+(define-key boon-x-map "g" 'magit-status)
+(define-key boon-x-map "a" 'org-agenda)
+(define-key boon-x-map "b" 'consult-buffer)
+
+(define-key boon-goto-map "o" 'counsel-org-goto)
+(define-key boon-command-map "/" 'hs-toggle-hiding)
+
+;; Non-Boon keys
+(global-set-key (kbd "C-s") 'swiper)
+(global-set-key (kbd "M-s") 'consult-git-grep)
+(global-set-key (kbd "C-0") 'iterm-here)
+(global-set-key (kbd "C-9") 'finder-here)
+
+
+;; Russian typewriter QWERTY
+(quail-define-package
+ "russian-mac" "Russian" "RU" nil
+ "ЙЦУКЕН Russian Mac layout"
+ nil t t t t nil nil nil nil nil t)
+(quail-define-rules
+ ;; row 1
+ ("§" ?§) ("1" ?№) ("2" ?-) ("3" ?/) ("4" ?\") ("5" ?:) 
+ ("6" ?,) ("7" ?.) ("8" ?*) ("9" ??) ("0" ?%) ("-" ?!) ("=" ?\;)
+ ;; row 2
+ ("q" ?й) ("w" ?ц) ("e" ?у) ("r" ?к) ("t" ?е) ("y" ?н) ("u" ?г) ("i" ?ш)
+ ("o" ?щ) ("p" ?з) ("[" ?х) ("]" ?ъ)
+ ;; row 3
+ ("a" ?ф) ("s" ?ы) ("d" ?в) ("f" ?а) ("g" ?п) ("h" ?р) ("j" ?о) ("k" ?л)
+ ("l" ?д) (";" ?ж) ("\'" ?э) ("\\" ?\))
+ ;; row
+ ("z" ?я) ("x" ?ч) ("c" ?с) ("v" ?м) ("b" ?и) ("n" ?т) ("m" ?ь)
+ ("," ?б) ("." ?ю) ("/" ?ё)
+ ;; Shift row 1
+ ("±" ?+) ("!" ?1) ("@" ?2) ("£" ?3) ("$" ?4) ("%" ?5) ("^" ?6) ("&" ?7)
+ ("*" ?8) ("(" ?9) (")" ?0) ("_" ?=) 
+ ;; Shift row 2
+ ("Q" ?Й) ("W" ?Ц) ("E" ?У) ("R" ?К) ("T" ?Е) ("Y" ?Н) ("U" ?Г) ("I" ?Ш)
+ ("O" ?Щ) ("P" ?З) ("{" ?Х) ("}" ?Ъ)
+ ;; Shift row 3
+ ("A" ?Ф) ("S" ?Ы) ("D" ?В) ("F" ?А) ("G" ?П) ("H" ?Р) ("J" ?О) ("K" ?Л)
+ ("L" ?Д) (":" ?Ж) ("\"" ?Э) ("|" ?\()
+ ;; Shift row
+ ("Z" ?Я) ("X" ?Ч) ("C" ?С) ("V" ?М) ("B" ?И) ("N" ?Т) ("M" ?Ь)
+ ("<" ?Б) (">" ?Ю) ("?" ?Ё))
+
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; UI
+
+;; Remove crap
+(setq inhibit-splash-screen t)
+(tool-bar-mode -1)
+(setq ring-bell-function 'ignore)
+(toggle-scroll-bar -1) 
+
+;; Fonts
+(set-face-attribute 'default nil
+                    :family "IBM Plex Mono"
+		    :weight 'normal
+                    :height 170)
+(set-face-attribute 'mode-line nil :font "IBM Plex Mono-17")
+(set-face-attribute 'mode-line-inactive nil :font "IBM Plex Mono-17")
+
+;; JP's themes
+(use-package est)
+
+(est-plan9)
+(powerline-reset)
+
+;; Show matching parentheses
+(show-paren-mode 1)
+(setq show-paren-delay 0)
+
+
+(vertico-mode)
+(use-package vertico-directory
+  :load-path "~/.emacs.d/lisp/vertico/extensions/"
+  :bind (:map vertico-map
+		("RET" . vertico-directory-enter)
+		("DEL" . vertico-directory-delete-char)
+		("M-DEL" . vertico-directory-delete-word))
+)
+
+
+(recentf-mode)
+(savehist-mode)
+
+(use-package orderless
+  :init
+  ;;  Configure a custom style dispatcher (see the Consult wiki)
+  (setq completion-styles '(orderless)
+        completion-category-defaults nil
+        completion-category-overrides '((file (styles basic partial-completion)))))
+
+(use-package embark-consult
+  :ensure t
+  :after (embark consult)
+  :demand t ; only necessary if you have the hook below
+  ;; if you want to have consult previews as you move around an
+  ;; auto-updating embark collect buffer
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
+
+(use-package marginalia
+  ;; Either bind `marginalia-cycle` globally or only in the minibuffer
+  :bind (("M-A" . marginalia-cycle)
+         :map minibuffer-local-map
+         ("M-A" . marginalia-cycle))
+
+  ;; The :init configuration is always executed (Not lazy!)
+  :init
+
+  ;; Must be in the :init section of use-package such that the mode gets
+  ;; enabled right away. Note that this forces loading the package.
+  (marginalia-mode))
+
+(use-package corfu
+  ;; Optional customizations
+  :custom
+  (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
+  (corfu-auto t)                 ;; Enable auto completion
+  (corfu-auto-delay 0.5)
+  (corfu-commit-predicate nil)   ;; Do not commit selected candidates on next input
+  (corfu-quit-at-boundary t)     ;; Automatically quit at word boundary
+  (corfu-quit-no-match t)        ;; Automatically quit if there is no match
+  ;; (corfu-echo-documentation nil) ;; Do not show documentation in the echo area
+  ;; (corfu-scroll-margin 5)        ;; Use scroll margin
+  ;; (corfu-preview-current nil)    ;; Do not preview current candidate
+  
+
+  ;; Optionally use TAB for cycling, default is `corfu-complete'.
+  :bind (:map corfu-map
+         ("TAB" . corfu-next)
+         ([tab] . corfu-next)
+         ("S-TAB" . corfu-previous)
+         ([backtab] . corfu-previous))
+
+  ;; You may want to enable Corfu only for certain modes.
+  ;; :hook ((prog-mode . corfu-mode)
+  ;;        (shell-mode . corfu-mode)
+  ;;        (eshell-mode . corfu-mode))
+
+  ;; Recommended: Enable Corfu globally.
+  ;; This is recommended since dabbrev can be used globally (M-/).
+  :init
+  (global-corfu-mode))
+
+(use-package dabbrev
+  ;; Swap M-/ and C-M-/
+  :bind (("M-/" . dabbrev-completion)
+         ("C-M-/" . dabbrev-expand)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ORG
+
+(setq org-latex-pdf-process '("latexmk -xelatex -quiet -shell-escape -f %f"))
+(use-package org-contrib
+  :pin manual
+  :load-path "~/.emacs.d/lisp/org-contrib/lisp/"
+  :config
+  (require 'ox-extra)
+  (ox-extras-activate '(ignore-headlines)))
+
+(customize-set-value 'org-latex-with-hyperref nil)
+
+(add-hook 'org-mode-hook #'visual-line-mode)
+(add-hook 'org-mode-hook #'org-indent-mode)
+(add-hook 'auto-save-hook #'org-save-all-org-buffers)
+
+(use-package org-bullets
+  :hook (org-mode . org-bullets-mode))
+
+(setq org-hide-emphasis-markers t)
+
+
+;; Calendar
+(add-hook 'calendar-load-hook
+         (lambda ()
+            (calendar-set-date-style 'european)))
+(setq calendar-week-start-day 1)
+
+;; Org-babel
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((gnuplot . t)))
+
+
+;; Agenda
+(progn
+  (add-to-list 'org-agenda-files "~/org/planner.org")
+  (add-to-list 'org-agenda-files "~/org/common/art.org")
+  (setq org-agenda-window-setup 'current-window)
+  (add-hook 'after-init-hook 'org-agenda-list)
+  (setq org-default-notes-file "~/org/planner.org")
+  (setq org-agenda-start-on-weekday nil))
+
+;; Track habits
+(require 'org-habit)
+
+(require 'org-inlinetask)
+
+;; Latex as link
+(org-add-link-type "latex" nil (lambda (path desc format) (cond ((eq
+        format 'latex) (format "\\%s{%s}" path desc)))))
+
+(setq org-latex-create-formula-image-program 'dvisvgm)
+
+
+;; Org ref (should get deprecated)
+(setq bibtex-completion-bibliography
+      '("~/org/library/library.bib")
+      bibtex-completion-display-formats '((article
+      . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36}
+      ${title:*} ${journal:40}")
+	  (inbook        . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} Chapter ${chapter:32}")
+	  (incollection  . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} ${booktitle:40}")
+	  (inproceedings . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} ${booktitle:40}")
+	  (t             . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*}"))
+	bibtex-completion-pdf-open-function
+	(lambda (fpath)
+	  (call-process "open" nil 0 nil fpath)))
+
+(defvar *afilename-cmd*
+  '(("/Users/xmarvl/org/library/library.bib" . "cleanlibrary"))
+  "File association list with their respective command.")
+
+(defun my/cmd-after-saved-file ()
+  "Execute a command after saved a specific file."
+  (let* ((match (assoc (buffer-file-name) *afilename-cmd*)))
+    (when match
+      (message (concat "Executing: " (cdr match)))
+      (with-temp-buffer (shell-command (cdr match) t)))))
+
+(add-hook 'after-save-hook 'my/cmd-after-saved-file)
+
+(use-package citar
+  :bind (("C-c b" . citar-insert-citation)
+         :map minibuffer-local-map
+         ("M-b" . citar-insert-preset))
+  :custom
+  (org-cite-global-bibliography '("~/org/library/library.bib"))
+  (org-cite-insert-processor 'citar)
+  (org-cite-follow-processor 'citar)
+  (org-cite-activate-processor 'citar)
+  (citar-notes-paths '("~/org/library/notes/"))
+  (citar-library-paths '("~/org/library/pdfs/"))
+  (citar-bibliography org-cite-global-bibliography))
+
+
+(use-package tree-sitter
+  :config
+  ;; activate tree-sitter on any buffer containing code for which it has a parser available
+  ;; (global-tree-sitter-mode)
+  ;; you can easily see the difference tree-sitter-hl-mode makes for python, ts or tsx
+  ;; by switching on and off
+  (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
+
+(use-package tree-sitter-langs
+  :after tree-sitter)
+
+(use-package typescript-mode
+  :after tree-sitter
+  :config
+  ;; we choose this instead of tsx-mode so that eglot can automatically figure out language for server
+  ;; see https://github.com/joaotavora/eglot/issues/624 and https://github.com/joaotavora/eglot#handling-quirky-servers
+  (define-derived-mode typescriptreact-mode typescript-mode
+    "TypeScript TSX")
+  (add-to-list 'auto-mode-alist '("\\.tsx?\\'" . typescriptreact-mode))  
+  (add-to-list 'tree-sitter-major-mode-language-alist '(typescriptreact-mode . tsx)))
+
+(defun my/project-override (dir)
+  (let ((override (locate-dominating-file dir ".project.el")))
+    (if override
+      (cons 'vc override)
+      nil)))
+
+(use-package project
+  ;; Cannot use :hook because 'project-find-functions does not end in -hook
+  ;; Cannot use :init (must use :config) because otherwise
+  ;; project-find-functions is not yet initialized.
+  :config
+  (add-hook 'project-find-functions #'my/project-override))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Mail
+
+(require 'mu4e)
+(setq mu4e-mu-binary "~/.nix-profile/bin/mu")
+(mu4e-marker-icons-mode t)
+(setq mu4e-use-fancy-chars 'nil)
+(setq mail-user-agent 'mu4e-user-agent)
+
+(setq mu4e-drafts-folder "/gu/Drafts")
+(setq mu4e-sent-folder   "/gu/Sent Items")
+(setq mu4e-trash-folder  "/gu/Archive")
+(setq mu4e-refile-folder "/gu/backlog")
+
+(setq mu4e-get-mail-command "mbsync -a")
+
+(setq mu4e-maildir-shortcuts
+  '( (:maildir "/gu/Inbox"     :key  ?i)
+     (:maildir "/gu/backlog"   :key  ?b)
+     (:maildir "/gu/Sent Items"   :key  ?s)))
+
+(setq mu4e-change-filenames-when-moving t)
+
+(require 'smtpmail)
+(add-hook 'mu4e-compose-mode-hook #'(lambda () (auto-save-mode -1)))
+(setq send-mail-function 'smtpmail-send-it
+      smtpmail-smtp-server "smtp.outlook.com"
+      smtpmail-smtp-service 587)
+(setq mu4e-sent-messages-behavior 'delete)
+(setq
+ mu4e-compose-signature
+ (concat "Vladislav Maraev\n"
+	 "Postdoctoral researcher\n\n"
+	 "Dept. of Applied IT, Division of Cognition & Communication\n"
+	 "University of Gothenburg"))
+(setq mu4e-headers-date-format "%d %b %Y"
+      mu4e-headers-time-format "%H:%M")
+
+
+(define-key mu4e-headers-mode-map (kbd "i")  'mu4e-headers-prev)
+(define-key mu4e-headers-mode-map (kbd "o")    'mu4e-headers-next)
+(define-key mu4e-view-mode-map (kbd "i")  'mu4e-view-headers-prev)
+(define-key mu4e-view-mode-map (kbd "o")    'mu4e-view-headers-next)
+
+(setq smtpmail-queue-mail t  ;; start in queuing mode
+      smtpmail-queue-dir   "~/Maildir/queue/cur")
