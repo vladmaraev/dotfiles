@@ -19,6 +19,18 @@ in
     };
   };
 
+  launchd.enable = true;
+  launchd.agents = {
+    mbsync = {
+      enable = true;
+      config = {
+        KeepAlive = true;
+        ProgramArguments = [ "mbsync" "-a" ];
+        ThrottleInterval = 180;
+        StartOnMount = true;
+      };      
+    };
+  };
   # This value determines the Home Manager release that your
   # configuration is compatible with. This helps avoid breakage
   # when a new Home Manager release introduces backwards

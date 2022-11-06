@@ -373,6 +373,13 @@
      (:maildir "/gu/Sent Items"   :key  ?s)))
 
 (setq mu4e-change-filenames-when-moving t)
+(setq mu4e-headers-date-format "%d %b %Y"
+      mu4e-headers-time-format "%H:%M")
+(setq mu4e-split-view 'horizontal)
+
+(setq
+  mu4e-index-cleanup nil      ;; don't do a full cleanup check
+  mu4e-index-lazy-check t)    ;; don't consider up-to-date dirs
 
 (require 'smtpmail)
 (add-hook 'mu4e-compose-mode-hook #'(lambda () (auto-save-mode -1)))
@@ -386,9 +393,6 @@
 	 "Postdoctoral researcher\n\n"
 	 "Dept. of Applied IT, Division of Cognition & Communication\n"
 	 "University of Gothenburg"))
-(setq mu4e-headers-date-format "%d %b %Y"
-      mu4e-headers-time-format "%H:%M")
-
 
 (define-key mu4e-headers-mode-map (kbd "i")  'mu4e-headers-prev)
 (define-key mu4e-headers-mode-map (kbd "o")    'mu4e-headers-next)
@@ -397,3 +401,18 @@
 
 (setq smtpmail-queue-mail t  ;; start in queuing mode
       smtpmail-queue-dir   "~/Maildir/queue/cur")
+
+(setq message-kill-buffer-on-exit t)
+
+(setq message-citation-line-format "On %d %b %Y at %R, %f wrote:")
+(setq message-citation-line-function 'message-insert-formatted-citation-line)
+
+;; opening PDFs
+(when (require 'openwith nil 'noerror)
+  (setq openwith-associations
+        (list
+         (list (openwith-make-extension-regexp
+                '("pdf"))
+               "open"
+               '(file))))
+	(openwith-mode 1))

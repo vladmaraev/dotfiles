@@ -13,11 +13,12 @@
       magit forge
       marginalia
       multiple-cursors
-      thread-folding
+      openwith
       orderless
       org-contrib org-bullets
       semantic-theming
       swiper
+      thread-folding
       typescript-mode
       vertico
       
