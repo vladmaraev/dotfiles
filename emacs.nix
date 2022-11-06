@@ -3,6 +3,8 @@
   epkgs: (
     with epkgs; [
       use-package
+
+      agda-input
       consult
       corfu
       citar
@@ -16,10 +18,12 @@
       openwith
       orderless
       org-contrib org-bullets
+      persistent-soft
       semantic-theming
       swiper
       thread-folding
       typescript-mode
+      unicode-fonts
       vertico
       
       nix-mode

@@ -17,6 +17,9 @@ in
     ".emacs" = {
       source = programs/emacs/emacs;
     };
+    # ".agda/defaults" = {
+    #   source = programs/agda/defaults;
+    # };
   };
 
   launchd.enable = true;
@@ -52,15 +55,24 @@ in
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
   
-  home.packages = [ 
-    pkgs.tree
-    pkgs.git
-    pkgs.git-lfs
-    pkgs.nodejs pkgs.nodePackages.yarn pkgs.nodePackages.typescript-language-server
-    pkgs.openssl
-    pkgs.omnisharp-roslyn
-    pkgs.dotnet-sdk_6
-  ];
+  home.packages = let
+    agda-stuff = (pkgs.agda.withPackages (with pkgs; [
+      agdaPackages.standard-library
+    ]));
+  in
+    with pkgs;
+    [
+      # agda-stuff # agda + packages
+      aspell
+      aspellDicts.en
+      tree
+      git
+      git-lfs
+      nodejs nodePackages.yarn nodePackages.typescript-language-server
+      openssl
+      omnisharp-roslyn
+      dotnet-sdk_6
+    ];
 
   services.emacs = {
     package = pkgs.emacs;
@@ -96,6 +108,17 @@ in
           rev = "b95cd5f4587d458e9578708cf1101be5c2e3c8f8";
           sha256 = "sha256-ZF6i/32iFXfeXTPCT/LPFpXmboZ3tpdB+GDs6T9IwfA=";
         };
+        buildPhase = "";
+      };
+      agda-input = self.trivialBuild {
+        pname = "agda-input";
+        version = "0.0.1";
+        src = pkgs.fetchFromGitHub {
+          owner = "agda";
+          repo = "agda";
+          rev = "v2.6.2.2";
+          sha256 = "sha256-/Hmgy3W8cdtSW0Sz4G53swAq//q6hPxW4OSG401pU08=";
+        } + "/src/data/emacs-mode/";
         buildPhase = "";
       };
     };
