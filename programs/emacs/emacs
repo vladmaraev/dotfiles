@@ -399,6 +399,11 @@
       mu4e-update-interval 60
       mu4e-index-update-in-background t)
 
+(setq mu4e-bookmarks
+      '(( :name "≥1w old messages"
+          :query "(maildir:/gu/Inbox OR maildir:/gu/backlog) AND date:..1w"
+          :key ?o)
+	))
 
 (setq mu4e-maildir-shortcuts
   '( (:maildir "/gu/Inbox"     :key  ?i)
