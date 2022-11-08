@@ -190,6 +190,21 @@
   ;; enabled right away. Note that this forces loading the package.
   (marginalia-mode))
 
+(use-package embark
+  :bind
+  (("C-." . embark-act)         ;; pick some comfortable binding
+   ("C-;" . embark-dwim)        ;; good alternative: M-.
+   ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+  :init
+  ;; Optionally replace the key help with a completing-read interface
+  (setq prefix-help-command #'embark-prefix-help-command)
+  :config
+  ;; Hide the mode line of the Embark live/completions buffers
+  (add-to-list 'display-buffer-alist
+               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                 nil
+                 (window-parameters (mode-line-format . none)))))
+
 (use-package corfu
   ;; Optional customizations
   :custom
@@ -322,6 +337,12 @@
   (citar-library-paths '("~/org/library/pdfs/"))
   (citar-bibliography org-cite-global-bibliography))
 
+(use-package citar-embark
+  :after citar embark
+  :no-require
+  :config (citar-embark-mode))
+
+(setq citar-at-point-function 'embark-act)
 
 (use-package tree-sitter
   :config
@@ -367,10 +388,10 @@
 (setq mu4e-use-fancy-chars t)
 (setq mail-user-agent 'mu4e-user-agent)
 
-(setq mu4e-drafts-folder "/gu/Drafts")
-(setq mu4e-sent-folder   "/gu/Sent Items")
-(setq mu4e-trash-folder  "/gu/Archive")
-(setq mu4e-refile-folder "/gu/backlog")
+(setq mu4e-drafts-folder "/gu/Drafts"
+      mu4e-sent-folder   "/gu/Sent Items"
+      mu4e-trash-folder  "/gu/Deleted Items"
+      mu4e-refile-folder "/gu/Archive")
 
 (setq mu4e-get-mail-command "mbsync -a"
       mu4e-update-interval 300
@@ -388,8 +409,8 @@
 (setq mu4e-split-view 'horizontal)
 
 (setq
-  mu4e-index-cleanup nil      ;; don't do a full cleanup check
-  mu4e-index-lazy-check t)    ;; don't consider up-to-date dirs
+  mu4e-index-cleanup t
+  mu4e-index-lazy-check nil)
 
 (require 'smtpmail)
 (add-hook 'mu4e-compose-mode-hook #'(lambda () (auto-save-mode -1)))
@@ -403,6 +424,7 @@
 	 "Postdoctoral researcher\n\n"
 	 "Dept. of Applied IT, Division of Cognition & Communication\n"
 	 "University of Gothenburg"))
+(setq mu4e-compose-signature-auto-include nil)
 
 (define-key mu4e-headers-mode-map (kbd "i")  'mu4e-headers-prev)
 (define-key mu4e-headers-mode-map (kbd "o")    'mu4e-headers-next)
@@ -425,14 +447,18 @@
                 '("pdf"))
                "open"
                '(file))))
-	(openwith-mode 1))
+  (openwith-mode 1))
+(add-to-list  'mm-inhibit-file-name-handlers 'openwith-file-handler)
 
-(setq mu4e-headers-personal-mark '("p" . ""))
-(setq mu4e-headers-seen-mark '("S" . "✓"))
-(setq mu4e-headers-passed-mark '("P" . "➫"))
-(setq mu4e-headers-replied-mark '("R" . "R"))
-(setq mu4e-headers-attach-mark '("a" . "⚓"))
-(setq mu4e-headers-list-mark '("s" . "⋮"))
+(setq mu4e-headers-personal-mark '("p" . "")
+      mu4e-headers-seen-mark '("S" . "✓")
+      mu4e-headers-passed-mark '("P" . "➫")
+      mu4e-headers-replied-mark '("R" . "↩")
+      mu4e-headers-attach-mark '("a" . "⚓")
+      mu4e-headers-flagged-mark '("F" . "⚑")
+      mu4e-headers-list-mark '("s" . "⋮")
+      mu4e-headers-new-mark '("N" . "✦")
+      mu4e-headers-new-mark '("D" . "✎"))
 (setq mu4e-headers-thread-last-child-prefix '("L" . "╰ ")
       mu4e-headers-thread-first-child-prefix '("o " . "├ "))
 
@@ -440,4 +466,3 @@
                             (:flags         .    6)
                             (:from          .   22)
                             (:subject       .   nil)))
-

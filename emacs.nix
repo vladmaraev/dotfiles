@@ -5,9 +5,12 @@
       use-package
 
       agda-input
+      auctex
+      auctex-latexmk
+      avy
       consult
       corfu
-      citar
+      citar citar-embark
       diminish
       dash
       embark embark-consult
@@ -27,13 +30,10 @@
       vertico
       
       nix-mode
-      avy
       expand-region
       boon    
       powerline
       corfu
-      auctex
-      auctex-latexmk
       csharp-mode
       eglot
       tree-sitter

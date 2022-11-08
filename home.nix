@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 let
   emacs-overlay = fetchTarball {
@@ -94,8 +94,8 @@ in
         src = pkgs.fetchFromGitHub {
           owner = "vladmaraev";
           repo = "emacs-semantics-theming";
-          rev = "a7c2740b8edd50d16631496836ab915932cb411a";
-          sha256 = "13d974vfj84vav1dngy5kygj0rbcrlc9dir2cm8rvmppf3yvcfy4";
+          rev = "4fdf2b7688ca3a4fd2430de079bbd09cd5247da6";
+          sha256 = "sha256-jtwhaDXXj7xhB4gfkjNDqGPhlrx+9l2LDCcVQ6RUm4A=";
         };
         buildPhase = "";
       };
