@@ -68,7 +68,7 @@ in
       tree
       git
       git-lfs
-      nodejs nodePackages.yarn nodePackages.typescript-language-server
+      nodejs nodePackages.yarn nodePackages.prettier nodePackages.typescript-language-server
       openssl
       omnisharp-roslyn
       dotnet-sdk_6

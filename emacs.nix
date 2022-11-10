@@ -5,6 +5,7 @@
       use-package
 
       agda-input
+      apheleia
       auctex
       auctex-latexmk
       avy

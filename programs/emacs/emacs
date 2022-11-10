@@ -365,6 +365,8 @@
   (add-to-list 'auto-mode-alist '("\\.tsx?\\'" . typescriptreact-mode))  
   (add-to-list 'tree-sitter-major-mode-language-alist '(typescriptreact-mode . tsx)))
 
+(add-hook 'typescript-mode-hook #'apheleia-mode)
+
 (defun my/project-override (dir)
   (let ((override (locate-dominating-file dir ".project.el")))
     (if override
@@ -394,7 +396,7 @@
       mu4e-refile-folder "/gu/Archive")
 
 (setq mu4e-get-mail-command "mbsync -a"
-      mu4e-update-interval 300
+      mu4e-update-interval 60
       mu4e-index-update-in-background t)
 
 
@@ -458,11 +460,12 @@
       mu4e-headers-flagged-mark '("F" . "⚑")
       mu4e-headers-list-mark '("s" . "⋮")
       mu4e-headers-new-mark '("N" . "✦")
-      mu4e-headers-new-mark '("D" . "✎"))
+      mu4e-headers-draft-mark '("D" . "✎"))
 (setq mu4e-headers-thread-last-child-prefix '("L" . "╰ ")
-      mu4e-headers-thread-first-child-prefix '("o " . "├ "))
+      mu4e-headers-thread-first-child-prefix '("o " . "├ ")
+      mu4e-headers-thread-orphan-prefix '("o " . "┌ "))	
 
 (setq mu4e-headers-fields '((:human-date    .   12)
                             (:flags         .    6)
-                            (:from          .   22)
-                            (:subject       .   nil)))
+                            (:from-or-to          .   22)
+                            (:thread-subject       .   nil)))
