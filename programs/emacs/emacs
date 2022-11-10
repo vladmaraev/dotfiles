@@ -438,7 +438,7 @@
 (define-key mu4e-view-mode-map (kbd "i")  'mu4e-view-headers-prev)
 (define-key mu4e-view-mode-map (kbd "o")    'mu4e-view-headers-next)
 
-(setq smtpmail-queue-mail t  ;; start in queuing mode
+(setq smtpmail-queue-mail nil  ;; start in queuing mode
       smtpmail-queue-dir   "~/Maildir/queue/cur")
 
 (setq message-kill-buffer-on-exit t)
