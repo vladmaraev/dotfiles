@@ -65,13 +65,13 @@ in
       # agda-stuff # agda + packages
       aspell
       aspellDicts.en
-      tree
+      dotnet-sdk_6
       git
       git-lfs
       nodejs nodePackages.yarn nodePackages.prettier nodePackages.typescript-language-server
       openssl
       omnisharp-roslyn
-      dotnet-sdk_6
+      tree
     ];
 
   services.emacs = {
@@ -126,7 +126,10 @@ in
 
   accounts.email = {
     accounts.gu = {
+      primary = true;
       address = "vladislav.maraev@gu.se";
+      realName = "Vladislav Maraev";
+
       imap.host = "outlook.office365.com";
       imap.tls.certificatesFile = ~/.cert/outlook.office365.com.pem;
       
@@ -136,7 +139,6 @@ in
         expunge = "both";
       };
       msmtp.enable = true;
-      primary = true;
       userName = "vladislav.maraev@gu.se";
       passwordCommand = "security find-internet-password -a xmarvl -w";
       smtp = {
@@ -144,5 +146,24 @@ in
         tls.certificatesFile = ~/.cert/outlook.office365.com.pem;
       };
     };
+    # accounts.talkamatic = {
+    #   address = "vlad@talkamatic.se";
+    #   realName = "Vladislav Maraev";
+
+    #   imap.host = "outlook.office365.com";
+    #   imap.tls.certificatesFile = ~/.cert/outlook.office365.com.pem;
+    #   mbsync = {
+    #     enable = true;
+    #     create = "maildir";
+    #     expunge = "both";
+    #   };
+    #   msmtp.enable = true;
+    #   userName = "vlad@talkamatic.se";
+    #   passwordCommand = "keybase decrypt -i ~/tmp/talkamatic.key";
+    #   smtp = {
+    #     host = "smtp.office365.com";
+    #     tls.certificatesFile = ~/.cert/outlook.office365.com.pem;
+    #   };
+    # };
   };
 }
