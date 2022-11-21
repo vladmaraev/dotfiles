@@ -17,6 +17,9 @@ in
     ".emacs" = {
       source = programs/emacs/emacs;
     };
+    ".ssh/config" = {
+      source = programs/ssh/config;
+    };
     # ".agda/defaults" = {
     #   source = programs/agda/defaults;
     # };
@@ -66,18 +69,28 @@ in
       aspell
       aspellDicts.en
       dotnet-sdk_6
-      git
       git-lfs
       nodejs nodePackages.yarn nodePackages.prettier nodePackages.typescript-language-server
       openssl
       omnisharp-roslyn
+      pass
       tree
     ];
 
   services.emacs = {
     package = pkgs.emacs;
   };
-  
+
+  programs.git = {
+    enable = true;
+    userEmail = "vlad@maraev.me";
+    userName = "Vladislav Maraev";
+    signing = {
+        key = "0A6A67D83FBD77DB";
+        signByDefault = true;
+    };
+  };
+  programs.gpg.enable = true;
   programs.fish.enable = true;
   programs.mu.enable = true;
   programs.msmtp.enable = true;
@@ -140,7 +153,7 @@ in
       };
       msmtp.enable = true;
       userName = "vladislav.maraev@gu.se";
-      passwordCommand = "security find-internet-password -a xmarvl -w";
+      passwordCommand = "pass Email/vladislav.maraev@gu.se";
       smtp = {
         host = "smtp.office365.com";
         tls.certificatesFile = ~/.cert/outlook.office365.com.pem;

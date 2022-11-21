@@ -1,0 +1,61 @@
+Host lark
+  HostName 130.241.53.209
+  LocalForward 10011 127.0.0.1:10011
+  User vlad
+
+Host dtlserv
+  HostName dtlserv.flov.gu.se
+  User xmarvl
+  Port 62266
+  ForwardX11 yes
+  ForwardX11Trusted yes
+
+Host mltgpu
+  HostName mltgpu.flov.gu.se
+  User xmarvl
+  Port 62266
+
+Host eduserv
+  HostName eduserv.flov.gu.se
+  User xmarvl
+  Port 62266
+
+Host ono-de
+  HostName 94.130.173.161
+  User vlad
+
+Host ono-spb
+  HostName 195.218.158.11
+  User uno
+  Port 48972
+
+Host ono-test
+  HostName 95.216.208.74
+  User vlad
+
+Host ros-aws
+  HostName ec2-13-53-37-116.eu-north-1.compute.amazonaws.com
+  User ubuntu
+  IdentityFile ~/.ssh/aws-gu.pem
+
+Host aws-uk
+  HostName ec2-35-177-33-186.eu-west-2.compute.amazonaws.com
+  User ubuntu
+  IdentityFile ~/.ssh/vlad.pem
+
+Host ono-master
+  HostName 116.203.199.202
+  User ono
+
+Host tala-dreamhost
+  HostName tala.pratb.art
+  User dh_t7g7cv
+
+Host klyuchik
+  HostName 161.97.173.208
+  User root
+
+Host *.github.com
+  AddKeysToAgent yes
+  UseKeychain yes
+  IdentityFile ~/.ssh/id_ed25519
