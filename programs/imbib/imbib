@@ -1,0 +1,2 @@
+library = %(home)s/org/library/library.bib
+editor = %(home)s/.nix-profile/bin/emacsclient

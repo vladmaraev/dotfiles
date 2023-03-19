@@ -40,7 +40,7 @@
 
 (defun iterm-here ()
   (interactive)
-  (dired-smart-shell-command "open -a iTerm $PWD" nil nil))
+  (dired-smart-shell-command "open -a iTerm2 $PWD" nil nil))
 
 
 (require 'consult)
@@ -70,6 +70,9 @@
 (define-key boon-x-map ";" 'boon-toggle-comment)
 (define-key boon-x-map "g" 'magit-status)
 (define-key boon-x-map "a" 'org-agenda)
+(define-key boon-x-map "c" 'org-capture)
+(define-key boon-x-map "t" 'vterm)
+
 (define-key boon-x-map "b" 'consult-buffer)
 (define-key boon-x-map "m" 'mu4e)
 
@@ -131,11 +134,12 @@
 (require 'persistent-soft) ; To cache the fonts and reduce load time
 (unicode-fonts-setup)
 (set-face-attribute 'default nil
-                    :family "IBM Plex Mono"
+                    :family "Darkmode Mono Off"
 		    :weight 'normal
                     :height 170)
-(set-face-attribute 'mode-line nil :font "Lexia Mono-17")
-(set-face-attribute 'mode-line-inactive nil :font "Lexia Mono-17")
+(set-face-attribute 'mode-line nil :font "Darkmode Mono Off-15")
+(set-face-attribute 'mode-line-inactive nil :font "Darkmode Mono Off-15")
+(set-face-attribute 'variable-pitch nil :font "Darkmode Off CC-15") ; mu4e
 
 ;; JP's themes
 (use-package est)
@@ -252,7 +256,8 @@
   (require 'ox-extra)
   (ox-extras-activate '(ignore-headlines)))
 
-(customize-set-value 'org-latex-with-hyperref nil)
+(setq org-latex-with-hyperref nil)    
+(add-to-list 'org-latex-default-packages-alist "\\PassOptionsToPackage{hidelinks}{hyperref}")  
 
 (add-hook 'org-mode-hook #'visual-line-mode)
 (add-hook 'org-mode-hook #'org-indent-mode)
@@ -262,6 +267,15 @@
   :hook (org-mode . org-bullets-mode))
 
 (setq org-hide-emphasis-markers t)
+
+(setq org-export-with-smart-quotes t) 
+(add-to-list 'org-export-smart-quotes-alist 
+             '("british"
+               (primary-opening :utf-8 "‘" :html "&lsquo;" :latex "`" :texinfo "`")
+               (primary-closing :utf-8 "’" :html "&rsquo;" :latex "'" :texinfo "'")
+               (secondary-opening :utf-8 "“" :html "&ldquo;" :latex "``" :texinfo "``")
+               (secondary-closing :utf-8 "”" :html "&rdquo;" :latex "\'\'" :texinfo "\'\'")
+               (apostrophe :utf-8 "’" :html "&rsquo;")))
 
 
 ;; Calendar
@@ -296,20 +310,27 @@
 
 (setq org-latex-create-formula-image-program 'dvisvgm)
 
+;; org-capture
+(setq org-capture-templates
+      '(("t" "Todo" entry (file+headline "~/org/planner.org" "Tasks")
+         "* TODO %?\n  %i\n  %a")
+        ("f" "Tickler" entry (file+headline "~/org/planner.org" "Tickler")
+         "* %? %^t %^g\n %i\n")
+	("b" "Bookmark" entry (file+headline "~/org/bookmarks.org" "Bookmarks")
+	 "* %(org-cliplink-capture)%?\n" :unnarrowed t)
+	("j" "Journal entry" plain
+         (file+olp+datetree "~/org/journal.org")
+         "%^{GLUTEN}p%^{SLEEP}p%^{ALCOHOL}p%^{EXERCISE}p" :tree-type week :immediate-finish t)
+	))
 
-;; Org ref (should get deprecated)
-(setq bibtex-completion-bibliography
-      '("~/org/library/library.bib")
-      bibtex-completion-display-formats '((article
-      . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36}
-      ${title:*} ${journal:40}")
-	  (inbook        . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} Chapter ${chapter:32}")
-	  (incollection  . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} ${booktitle:40}")
-	  (inproceedings . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*} ${booktitle:40}")
-	  (t             . "${=has-pdf=:1}${=has-note=:1} ${year:4} ${author:36} ${title:*}"))
-	bibtex-completion-pdf-open-function
-	(lambda (fpath)
-	  (call-process "open" nil 0 nil fpath)))
+(org-crypt-use-before-save-magic)
+(setq org-tags-exclude-from-inheritance '("crypt"))
+(setq org-crypt-key nil)
+
+(setq org-clock-idle-time 10)
+
+
+;; citations
 
 (defvar *afilename-cmd*
   '(("/Users/xmarvl/org/library/library.bib" . "cleanlibrary"))
@@ -344,28 +365,33 @@
 
 (setq citar-at-point-function 'embark-act)
 
-(use-package tree-sitter
-  :config
-  ;; activate tree-sitter on any buffer containing code for which it has a parser available
-  ;; (global-tree-sitter-mode)
-  ;; you can easily see the difference tree-sitter-hl-mode makes for python, ts or tsx
-  ;; by switching on and off
-  (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
+;; (use-package tree-sitter
+;;   :config
+;;   ;; activate tree-sitter on any buffer containing code for which it has a parser available
+;;   ;; (global-tree-sitter-mode)
+;;   ;; you can easily see the difference tree-sitter-hl-mode makes for python, ts or tsx
+;;   ;; by switching on and off
+;;   (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
 
-(use-package tree-sitter-langs
-  :after tree-sitter)
+;; (use-package tree-sitter-langs
+;;   :after tree-sitter)
 
 (use-package typescript-mode
-  :after tree-sitter
+  ;; :after tree-sitter
   :config
   ;; we choose this instead of tsx-mode so that eglot can automatically figure out language for server
   ;; see https://github.com/joaotavora/eglot/issues/624 and https://github.com/joaotavora/eglot#handling-quirky-servers
   (define-derived-mode typescriptreact-mode typescript-mode
     "TypeScript TSX")
   (add-to-list 'auto-mode-alist '("\\.tsx?\\'" . typescriptreact-mode))  
-  (add-to-list 'tree-sitter-major-mode-language-alist '(typescriptreact-mode . tsx)))
+  ;; (add-to-list 'tree-sitter-major-mode-language-alist '(typescriptreact-mode . tsx))
+  )
+
+
 
 (add-hook 'typescript-mode-hook #'apheleia-mode)
+(add-hook 'javascript-mode-hook #'apheleia-mode)
+(add-hook 'json-mode-hook #'apheleia-mode)
 
 (defun my/project-override (dir)
   (let ((override (locate-dominating-file dir ".project.el")))
@@ -390,26 +416,65 @@
 (setq mu4e-use-fancy-chars t)
 (setq mail-user-agent 'mu4e-user-agent)
 
-(setq mu4e-drafts-folder "/gu/Drafts"
-      mu4e-sent-folder   "/gu/Sent Items"
-      mu4e-trash-folder  "/gu/Deleted Items"
-      mu4e-refile-folder "/gu/Archive")
+(setq )
 
 (setq mu4e-get-mail-command "mbsync -a"
-      mu4e-update-interval 60
-      mu4e-index-update-in-background t)
+      mu4e-update-interval 120
+      mu4e-index-update-in-background t
+      mu4e-hide-index-messages t)
 
-(setq mu4e-bookmarks
-      '(( :name "≥1w old messages"
-          :query "(maildir:/gu/Inbox OR maildir:/gu/backlog) AND date:..1w"
-          :key ?o)
-	))
+(setq mu4e-bookmarks nil
+      ;; '(( :name "≥1w old messages"
+      ;;     :query "(maildir:/gu/Inbox OR maildir:/gu/backlog) AND date:..1w"
+      ;;     :key ?o)
+      ;; 	)
+      )
 
-(setq mu4e-maildir-shortcuts
-  '( (:maildir "/gu/Inbox"     :key  ?i)
-     (:maildir "/gu/backlog"   :key  ?b)
-     (:maildir "/gu/Sent Items"   :key  ?s)))
+(setq mu4e-maildir-shortcuts nil)
 
+(setq mu4e-contexts
+      (list
+       (make-mu4e-context
+          :name "GU"
+          :enter-func (lambda () (mu4e-message "Entering GU context"))
+          :leave-func (lambda () (mu4e-message "Leaving GU context"))
+          ;; we match based on the contact-fields of the message
+          :match-func (lambda (msg)
+                        (when msg
+                          (mu4e-message-contact-field-matches msg
+                            :to "vladislav.maraev@gu.se")))
+          :vars '( ( user-mail-address	    . "vladislav.maraev@gu.se"  )
+		   ( smtpmail-smtp-user	    . "vladislav.maraev@gu.se"  )
+		   (mu4e-drafts-folder . "/gu/Drafts")
+		   (mu4e-sent-folder   . "/gu/Sent Items")
+		   (mu4e-trash-folder  . "/gu/Deleted Items")
+		   (mu4e-refile-folder . "/gu/Archive")
+		   ( mu4e-maildir-shortcuts .  ( ("/gu/Inbox"     . ?i)
+						("/gu/backlog"   . ?b)
+						("/gu/Sent Items"   . ?s)))
+		   ))
+       (make-mu4e-context
+          :name "Talkamatic"
+          :enter-func (lambda () (mu4e-message "Switch to the Talkamatic context"))
+          :match-func (lambda (msg)
+                        (when msg
+                          (mu4e-message-contact-field-matches msg
+                            :to "vlad@talkamatic.se")))
+          :vars '( (user-mail-address	     . "vlad@talkamatic.se" )
+		   (smtpmail-smtp-user  . "vlad@talkamatic.se")
+		   (mu4e-drafts-folder . "/talkamatic/Drafts")
+		   (mu4e-sent-folder   . "/talkamatic/Sent Items")
+		   (mu4e-trash-folder  . "/talkamatic/Deleted Items")
+		   (mu4e-refile-folder . "/talkamatic/Archive")
+		   ( mu4e-maildir-shortcuts .  (("/talkamatic/Inbox"     . ?i)
+						("/talkamatic/backlog"   . ?b)
+						("/talkamatic/Sent Items"   . ?s)))
+		   ))
+       ))
+(setq mu4e-context-policy 'pick-first)
+(setq mu4e-compose-context-policy nil)
+
+       
 (setq mu4e-change-filenames-when-moving t)
 (setq mu4e-headers-date-format "%d %b %Y"
       mu4e-headers-time-format "%H:%M")
@@ -421,9 +486,38 @@
 
 (require 'smtpmail)
 (add-hook 'mu4e-compose-mode-hook #'(lambda () (auto-save-mode -1)))
+(add-hook 'mu4e-compose-mode-hook #'flyspell-mode)
+
+
+;;; Call the oauth2ms program to fetch the authentication token
+ (defun fetch-access-token ()
+   (with-temp-buffer
+      (call-process "oauth2ms" nil t nil "--encode-xoauth2")
+      (buffer-string)))
+
+ ;;; Add new authentication method for xoauth2
+ (cl-defmethod smtpmail-try-auth-method
+   (process (_mech (eql xoauth2)) user password)
+   (let* ((access-token (fetch-access-token)))
+      (smtpmail-command-or-throw
+       process
+       (concat "AUTH XOAUTH2 " access-token)
+       235)))
+
+ ;;; Register the method
+ (with-eval-after-load 'smtpmail
+   (add-to-list 'smtpmail-auth-supported 'xoauth2))
+
 (setq send-mail-function 'smtpmail-send-it
-      smtpmail-smtp-server "smtp.outlook.com"
-      smtpmail-smtp-service 587)
+      starttls-use-gnutls t
+      smtpmail-starttls-credentials
+      '(("smtp.office365.com" 587 nil nil))
+      smtpmail-default-smtp-server "smtp.office365.com"
+      smtpmail-smtp-server "smtp.office365.com"
+      smtpmail-stream-type  'starttls
+      smtpmail-smtp-service 587
+      smtpmail-debug-info t)
+
 (setq mu4e-sent-messages-behavior 'delete)
 (setq
  mu4e-compose-signature
@@ -474,3 +568,15 @@
                             (:flags         .    6)
                             (:from-or-to          .   22)
                             (:subject       .   nil)))
+
+(defvar *my-notifier-path* "terminal-notifier")  
+(defun my/send-notification (title msg)
+  (shell-command 
+   (concat *my-notifier-path* " -message \"" msg "\" -title " title " -sound default -sender org.gnu.Emacs")))
+
+(add-hook 'org-timer-done-hook (lambda () (my/send-notification "Org Mode" "It’s about time!")))
+
+
+(add-hook 'vterm-mode-hook #'(lambda () (boon-set-insert-state)))
+
+

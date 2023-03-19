@@ -57,5 +57,9 @@ Host klyuchik
 
 Host *.github.com
   AddKeysToAgent yes
-  UseKeychain yes
-  IdentityFile ~/.ssh/id_ed25519
+  IdentityFile ~/.ssh/id_rsa
+
+Host toro
+  HostName 192.168.3.200
+  LocalForward 10011 127.0.0.1:10011
+  User gusmohyo
