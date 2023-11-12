@@ -63,3 +63,8 @@ Host toro
   HostName 192.168.3.200
   LocalForward 10011 127.0.0.1:10011
   User gusmohyo
+
+Host 192.168.3.200
+  AddKeysToAgent yes
+  IdentityFile ~/.ssh/id_rsa
+  PubkeyAcceptedKeyTypes +ssh-rsa

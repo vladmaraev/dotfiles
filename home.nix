@@ -1,9 +1,9 @@
 { config, pkgs, stdenv,  ... }:
 
 let
-  emacs-overlay = fetchTarball {
-    url = https://github.com/nix-community/emacs-overlay/archive/master.tar.gz;
-  };
+  # emacs-overlay = fetchTarball {
+  #   url = https://github.com/nix-community/emacs-overlay/archive/a46829010dd9d129fd930ae76aba9f09b4160630.tar.gz;
+  # };
   nixos = import <nixos> { };
 in
 {
@@ -63,15 +63,30 @@ in
   # You can update Home Manager without changing this value. See
   # the Home Manager release notes for a list of state version
   # changes in each release.
-  home.stateVersion = "22.11";
+  home.stateVersion = "23.11";
   manual.manpages.enable = false;
 
   nixpkgs = {
     config.allowUnfree = true; # for things like spotify
     # overlays
     overlays = [
-      (import "${emacs-overlay}")
+      (import (builtins.fetchTarball {
+        # url = https://github.com/nix-community/emacs-overlay/archive/bdc9dc52f1ae9772ebdca1f132554fe548392001.tar.gz;
+        url = https://github.com/nix-community/emacs-overlay/archive/master.tar.gz;
+      }))
     ];
+  };
+
+  programs.java = { enable = true; package = pkgs.openjdk8; };
+
+
+  nix = {
+    package = pkgs.nixFlakes;
+    extraOptions = ''
+    experimental-features = nix-command flakes
+    substituters = https://cache.nixos.org https://nix-community.cachix.org
+    trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=
+      '';
   };
   
   # Let Home Manager install and manage itself.
@@ -81,16 +96,29 @@ in
     agda-stuff = (pkgs.agda.withPackages (with pkgs; [
       agdaPackages.standard-library
     ]));
+    haskell-packages = pkgs.haskell.packages.ghc961.ghcWithPackages (ps: with ps; ([
+      cabal-install
+    ]));
     python-packages = py-pkgs: with py-pkgs; [
       nltk
+      python-lsp-server
+      black
+      build
+      pyflakes
+      rope
+      pycodestyle
+      pydocstyle
+      setuptools
+      pip
       #  pytorch
-        # numpy
-        # pandas
-        # pygments
-        # scikit-learn
-        # tensorflowWithoutCuda
+      # numpy
+      # pandas
+      # pygments
+      # scikit-learn
+      # tensorflowWithoutCuda
     ];
     python-stuff = pkgs.python38.withPackages python-packages;
+    aspell-with-dicts  = pkgs.aspellWithDicts (d: [d.en]);
     tex = (pkgs.texlive.combine {
       inherit (pkgs.texlive) scheme-basic
         adjustbox
@@ -99,25 +127,31 @@ in
         biber
         biblatex
 		    biblatex-apa
+        biblatex-trad
         boondox
         catchfile
+        changepage
         collection-fontsrecommended
         collectbox
+        covington
         comment
         csquotes
         cleveref
         datatool
+        datetime
         doublestroke
         ebproof
         environ
         enumitem
 			  eqparbox
         fontaxes
+        fmtcount
         framed
         fvextra
         glossaries
         glossaries-english
         harvard
+        hyperxmp
         ifplatform
         ifsym
         imakeidx
@@ -146,6 +180,7 @@ in
         newunicodechar
         paralist
         pgfgantt
+        preprint
         prftree
         pst-tree
         pst-node
@@ -155,7 +190,9 @@ in
         sectsty
         scheme-small wrapfig marvosym wasysym
         soul
+        standalone
         stmaryrd
+        sttools
         svg
         lazylist polytable # lhs2tex
         tabulary
@@ -187,22 +224,38 @@ in
     with pkgs;
     [
       # agda-stuff # agda + packages
-      aspell
-      aspellDicts.en
+      ant
+      aspell-with-dicts
+      cachix
+      clang
       dotnet-sdk_6
       git-lfs
+      github-cli
+      gnuplot
+      gradle
       imagemagick
-      nodejs nodePackages.yarn nodePackages.prettier nodePackages.typescript nodePackages.typescript-language-server nodePackages.sass
+      inkscape
+      ledger
+      ltex-ls
+      nodejs nodePackages.yarn nodePackages.prettier nodePackages.typescript nodePackages.typescript-language-server nodePackages.sass nodePackages.vscode-langservers-extracted nodePackages.gatsby-cli
       openssl
       omnisharp-roslyn
       pass
       passff-host
-      # python-stuff
+      perl
+      pinentry
+      php
+      python-stuff
+      # haskell-packages
       terminal-notifier
       tex
       tree
       iterm2
       ffmpeg
+      wget
+
+      vips
+      youtube-dl
     ];
 
   programs.git = {
@@ -210,8 +263,11 @@ in
     userEmail = "vlad@maraev.me";
     userName = "Vladislav Maraev";
     signing = {
-        key = "0A6A67D83FBD77DB";
-        signByDefault = true;
+      key = "0A6A67D83FBD77DB";
+      signByDefault = true;
+    };
+    extraConfig = {
+      github.user = "vladmaraev";
     };
   };
   programs.gpg.enable = true;
@@ -219,8 +275,8 @@ in
   programs.k9s.enable = true;
   programs.mu.enable = true;
   programs.msmtp = {
-      enable = true;
-    };
+    enable = true;
+  };
   programs.mbsync = {
     enable = true;
     package = pkgs.isync-oauth2;
@@ -228,8 +284,8 @@ in
 
   programs.emacs = {                              
     enable = true;
-    package = pkgs.emacsGit;
-    extraPackages = import ./emacs.nix { inherit nixos pkgs; };
+    package = pkgs.emacs-unstable;
+    extraPackages = import ./emacs.nix { inherit pkgs; };
     overrides = self: super: {
       semantic-theming = self.trivialBuild {
         pname = "emacs-semantic-theming";
@@ -242,6 +298,18 @@ in
         };
         buildPhase = "";
       };
+      tree-sitter-langs-bugfix = self.trivialBuild {
+        pname = "tree-sitter-langs";
+        version = "0.0.1";
+        src = pkgs.fetchFromGitHub {
+          owner = "domq";
+          repo = "tree-sitter-langs";
+          rev = "9951fcf93f15e9b238ad8f6776af93cad7d2141f";
+          sha256 = "sha256-oUMSw6+UX1lrNLIQO0PttbOGNkKCgl8y6DIDVUzgg/c=";
+        };
+        buildPhase = "";
+      };
+
       thread-folding = self.trivialBuild {
         pname = "mu4e-thread-folding";
         version = "0.0.1";
@@ -278,6 +346,7 @@ in
     };
   };
 
+  
   accounts.email = {
     accounts.gu = {
       primary = true;
@@ -305,6 +374,23 @@ in
         tls.certificatesFile = ~/.cert/outlook.office365.com.pem;
       };
     };
+    accounts.maraevme = {
+      address = "vlad@maraev.me";
+      realName = "Vlad Maraev";
+      flavor = "gmail.com";
+      imapnotify.enable = true;
+      userName = "vlad@maraev.me";
+      msmtp.enable = true;
+      mu.enable = true;
+      passwordCommand = "pass Email/vlad@maraev.me";
+      imap.tls.certificatesFile = ~/.cert/outlook.office365.com.pem;
+      mbsync = {
+        enable = true;
+        create = "maildir";
+        expunge = "both";
+      };
+
+    };
     accounts.talkamatic = {
       address = "vlad@talkamatic.se";
       realName = "Vladislav Maraev";
@@ -330,8 +416,9 @@ in
   };
   programs.zsh = {
     enable = true;
-    enableSyntaxHighlighting = true;
-    
+    syntaxHighlighting = {
+      enable = true;
+    };
     oh-my-zsh = {
       enable = true;
       theme = "apple";
@@ -347,6 +434,7 @@ in
     };
     initExtra = ''
                export XDG_CONFIG_HOME=$HOME/.config
+               export EDITOR="emacsclient"  
                vterm_printf() {
                    if [ -n "$TMUX" ] && ([ "''${TERM%%-*}" = "tmux" ] || [ "''${TERM%%-*}" = "screen" ]); then
         # Tell tmux to pass the escape sequences through
@@ -359,7 +447,7 @@ in
     fi
 }
 
-
+source ''${HOME}/.ghcup/env
                '';
   };
 }

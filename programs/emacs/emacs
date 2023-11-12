@@ -24,12 +24,12 @@
 (setq mac-right-option-modifier nil)
 (setq mac-left-command-modifier nil)
 
-(require 'powerline)
-(setq powerline-default-separator 'slant)
-(setq powerline-display-buffer-size t)
-(setq powerline-display-hud t)
-(setq powerline-gui-use-vcs-glyph nil)
-(remove-hook 'focus-out-hook 'powerline-unset-selected-window) ;; mac hack
+;; (require 'powerline)
+;; (setq powerline-default-separator 'slant)
+;; (setq powerline-display-buffer-size t)
+;; (setq powerline-display-hud t)
+;; (setq powerline-gui-use-vcs-glyph nil)
+;; (remove-hook 'focus-out-hook 'powerline-unset-selected-window) ;; mac hack
 
 
 (require 'dired-x)
@@ -52,8 +52,8 @@
 (require 'boon-qwerty)
 (boon-mode)
 (require 'boon-tutorial)
-(require 'boon-powerline)
-(boon-powerline-theme)
+;; (require 'boon-powerline)
+;; (boon-powerline-theme)
 
 ;; for keyboard with no ESC
 (define-key boon-command-map "§" 'boon-quit)
@@ -86,7 +86,6 @@
 (global-set-key (kbd "C-9") 'finder-here)
 
 ;; Agda input
-(require 'agda-input)
 (setq default-input-method "Agda")
 
 ;; Russian typewriter QWERTY
@@ -128,24 +127,34 @@
 (tool-bar-mode -1)
 (setq ring-bell-function 'ignore)
 (toggle-scroll-bar -1) 
+(pixel-scroll-precision-mode t)
+
+
 
 ;; Fonts
-(require 'unicode-fonts)
-(require 'persistent-soft) ; To cache the fonts and reduce load time
-(unicode-fonts-setup)
+;; (require 'unicode-fonts)
+;; (require 'persistent-soft) ; To cache the fonts and reduce load time
+;; (unicode-fonts-setup)
 (set-face-attribute 'default nil
-                    :family "Darkmode Mono Off"
-		    :weight 'normal
+                    :family "Lexia Mono"
+		    :weight 'normal ; 🐂 🐂
                     :height 170)
-(set-face-attribute 'mode-line nil :font "Darkmode Mono Off-15")
-(set-face-attribute 'mode-line-inactive nil :font "Darkmode Mono Off-15")
-(set-face-attribute 'variable-pitch nil :font "Darkmode Off CC-15") ; mu4e
+(setq-default line-spacing 0) ; default 0
+
+(set-face-attribute 'mode-line nil :font "Lexia Mono-15")
+(set-face-attribute 'mode-line-inactive nil :font "Lexia Mono-15")
+
+(add-hook 'minibuffer-setup-hook 'my-minibuffer-setup)
+(defun my-minibuffer-setup ()
+       (set (make-local-variable 'face-remapping-alist)
+          '((default :height 150))))
+
 
 ;; JP's themes
 (use-package est)
 
 (est-plan9)
-(powerline-reset)
+;; (powerline-reset)
 
 ;; Show matching parentheses
 (show-paren-mode 1)
@@ -287,14 +296,18 @@
 ;; Org-babel
 (org-babel-do-load-languages
  'org-babel-load-languages
- '((gnuplot . t)))
+ '((gnuplot . t)
+   (shell . t)))
+(setq org-confirm-babel-evaluate nil)
 
 
 ;; Agenda
 (progn
   (add-to-list 'org-agenda-files "~/org/planner.org")
   (add-to-list 'org-agenda-files "~/org/common/art.org")
+  (add-to-list 'org-agenda-files "~/org/common/french.org")
   (setq org-agenda-window-setup 'current-window)
+  
   (add-hook 'after-init-hook 'org-agenda-list)
   (setq org-default-notes-file "~/org/planner.org")
   (setq org-agenda-start-on-weekday nil))
@@ -321,16 +334,30 @@
 	("j" "Journal entry" plain
          (file+olp+datetree "~/org/journal.org")
          "%^{GLUTEN}p%^{SLEEP}p%^{ALCOHOL}p%^{EXERCISE}p" :tree-type week :immediate-finish t)
-	))
+        ("s" "Swedish card" entry (file+headline "~/org/swe.org" "Swedish words") "* word\n:PROPERTIES:\n:DRILL_CARD_TYPE: hide1cloze\n:END:\nSw: [%^{Swe}]\nEn: [%^{Eng}]" :immediate-finish t
+	)))
 
+(require 'epa-file)
+(epa-file-enable)
+(fset 'epg-wait-for-status 'ignore)
+
+(require 'org-crypt)
 (org-crypt-use-before-save-magic)
 (setq org-tags-exclude-from-inheritance '("crypt"))
 (setq org-crypt-key nil)
+(setq epa-file-select-keys "0A6A67D83FBD77DB") 
 
 (setq org-clock-idle-time 10)
 
 
 ;; citations
+
+
+(setq shell-file-name "zsh"
+      shell-command-switch "-ic")
+
+(when (memq window-system '(mac ns x))
+  (exec-path-from-shell-initialize))
 
 (defvar *afilename-cmd*
   '(("/Users/xmarvl/org/library/library.bib" . "cleanlibrary"))
@@ -341,12 +368,12 @@
   (let* ((match (assoc (buffer-file-name) *afilename-cmd*)))
     (when match
       (message (concat "Executing: " (cdr match)))
-      (with-temp-buffer (shell-command (cdr match) t)))))
+      (with-temp-buffer (async-shell-command (cdr match))))))
 
 (add-hook 'after-save-hook 'my/cmd-after-saved-file)
 
 (use-package citar
-  :bind (("C-c b" . citar-insert-citation)
+  :bind (("C-c b" . citar-insert-reference)
          :map minibuffer-local-map
          ("M-b" . citar-insert-preset))
   :custom
@@ -357,6 +384,7 @@
   (citar-notes-paths '("~/org/library/notes/"))
   (citar-library-paths '("~/org/library/pdfs/"))
   (citar-bibliography org-cite-global-bibliography))
+
 
 (use-package citar-embark
   :after citar embark
@@ -377,22 +405,37 @@
 ;;   :after tree-sitter)
 
 (use-package typescript-mode
-  ;; :after tree-sitter
   :config
-  ;; we choose this instead of tsx-mode so that eglot can automatically figure out language for server
-  ;; see https://github.com/joaotavora/eglot/issues/624 and https://github.com/joaotavora/eglot#handling-quirky-servers
   (define-derived-mode typescriptreact-mode typescript-mode
     "TypeScript TSX")
   (add-to-list 'auto-mode-alist '("\\.tsx?\\'" . typescriptreact-mode))  
-  ;; (add-to-list 'tree-sitter-major-mode-language-alist '(typescriptreact-mode . tsx))
   )
 
 
 
-(add-hook 'typescript-mode-hook #'apheleia-mode)
+(add-hook 'typescript-ts-mode-hook  #'apheleia-mode)
 (add-hook 'javascript-mode-hook #'apheleia-mode)
 (add-hook 'json-mode-hook #'apheleia-mode)
 
+(setq project-vc-extra-root-markers '("package.json"))
+
+(defun project-root-override (dir)
+  "Find DIR's project root by searching for a '.project.el' file.
+
+If this file exists, it marks the project root. For convenient compatibility
+with Projectile, '.projectile' is also considered a project root marker.
+
+https://blog.jmthornton.net/p/emacs-project-override"
+  (let ((root (or (locate-dominating-file dir ".project.el")
+                  (locate-dominating-file dir "package.json")))
+        (backend (ignore-errors (vc-responsible-backend dir))))
+    (when root (if (version<= emacs-version "28")
+                    (cons 'vc root)
+                 (list 'vc backend root)))))
+
+(add-hook 'project-find-functions #'project-root-override)
+
+;; deprecate this?
 (defun my/project-override (dir)
   (let ((override (locate-dominating-file dir ".project.el")))
     (if override
@@ -412,22 +455,21 @@
 
 (require 'mu4e)
 (setq mu4e-mu-binary "~/.nix-profile/bin/mu")
-(mu4e-marker-icons-mode t)
+(mu4e-marker-icons-mode)
 (setq mu4e-use-fancy-chars t)
 (setq mail-user-agent 'mu4e-user-agent)
 
-(setq )
 
 (setq mu4e-get-mail-command "mbsync -a"
       mu4e-update-interval 120
       mu4e-index-update-in-background t
       mu4e-hide-index-messages t)
 
-(setq mu4e-bookmarks nil
-      ;; '(( :name "≥1w old messages"
-      ;;     :query "(maildir:/gu/Inbox OR maildir:/gu/backlog) AND date:..1w"
-      ;;     :key ?o)
-      ;; 	)
+(setq mu4e-bookmarks 
+      '(( :name "ZERO"
+          :query "(maildir:/gu/Inbox OR maildir:/gu/backlog)" ;;  AND date:..1w
+          :key ?o)
+	)
       )
 
 (setq mu4e-maildir-shortcuts nil)
@@ -450,8 +492,9 @@
 		   (mu4e-trash-folder  . "/gu/Deleted Items")
 		   (mu4e-refile-folder . "/gu/Archive")
 		   ( mu4e-maildir-shortcuts .  ( ("/gu/Inbox"     . ?i)
-						("/gu/backlog"   . ?b)
-						("/gu/Sent Items"   . ?s)))
+						 ("/gu/backlog"   . ?b)
+						 ("/gu/Sent Items"   . ?s)
+                                                 ("/gu/recall"   . ?r)))
 		   ))
        (make-mu4e-context
           :name "Talkamatic"
@@ -467,8 +510,27 @@
 		   (mu4e-trash-folder  . "/talkamatic/Deleted Items")
 		   (mu4e-refile-folder . "/talkamatic/Archive")
 		   ( mu4e-maildir-shortcuts .  (("/talkamatic/Inbox"     . ?i)
-						("/talkamatic/backlog"   . ?b)
-						("/talkamatic/Sent Items"   . ?s)))
+						("/talkamatic/tala-backlog"   . ?b)
+						("/talkamatic/Sent Items"   . ?s)
+                                                ("/talkamatic/recall"   . ?r)))
+		   ))
+       (make-mu4e-context
+          :name "maraev.me"
+          :enter-func (lambda () (mu4e-message "Switch to the maraev.me context"))
+          :match-func (lambda (msg)
+                        (when msg
+                          (mu4e-message-contact-field-matches msg
+                            :to "vlad@maraev.me")))
+          :vars '( (user-mail-address	     . "vlad@maraev.me" )
+		   (smtpmail-smtp-user  . "vlad@maraev.me")
+		   (mu4e-drafts-folder . "/maraevme/[Gmail]/Drafts")
+		   (mu4e-sent-folder   . "/maraevme/[Gmail]/Sent Mail")
+		   (mu4e-trash-folder  . "/maraevme/[Gmail]/Bin")
+		   (mu4e-refile-folder . "/maraevme/[Gmail]/All Mail")
+		   ( mu4e-maildir-shortcuts .  (("/maraevme/INBOX"     . ?i)
+						("/maraevme/backlog"   . ?b)
+						("/maraevme/[Gmail]/Sent Mail"   . ?s)
+                                                ("/maraevme/recall"   . ?r)))
 		   ))
        ))
 (setq mu4e-context-policy 'pick-first)
@@ -529,8 +591,14 @@
 
 (define-key mu4e-headers-mode-map (kbd "i")  'mu4e-headers-prev)
 (define-key mu4e-headers-mode-map (kbd "o")    'mu4e-headers-next)
+(define-key mu4e-view-mode-map (kbd "C-k")  'scroll-down-line)
+(define-key mu4e-view-mode-map (kbd "C-l")  'scroll-up-line)
 (define-key mu4e-view-mode-map (kbd "i")  'mu4e-view-headers-prev)
 (define-key mu4e-view-mode-map (kbd "o")    'mu4e-view-headers-next)
+(define-key mu4e-view-mode-map (kbd "D")    'boon-treasure-region)
+(define-key mu4e-view-mode-map (kbd "l")    'forward-char)
+(define-key mu4e-view-mode-map (kbd "k")    'backward-char)
+
 
 (setq smtpmail-queue-mail nil  ;; start in queuing mode
       smtpmail-queue-dir   "~/Maildir/queue/cur")
@@ -555,7 +623,7 @@
       mu4e-headers-seen-mark '("S" . "✓")
       mu4e-headers-passed-mark '("P" . "➫")
       mu4e-headers-replied-mark '("R" . "↩")
-      mu4e-headers-attach-mark '("a" . "⚓")
+      mu4e-headers-attach-mark '("a" . "❦")
       mu4e-headers-flagged-mark '("F" . "⚑")
       mu4e-headers-list-mark '("s" . "⋮")
       mu4e-headers-new-mark '("N" . "✦")
@@ -565,9 +633,12 @@
       mu4e-headers-thread-orphan-prefix '("o " . "┌ "))	
 
 (setq mu4e-headers-fields '((:human-date    .   12)
-                            (:flags         .    6)
+                            (:flags         .    5)
                             (:from-or-to          .   22)
                             (:subject       .   nil)))
+
+
+
 
 (defvar *my-notifier-path* "terminal-notifier")  
 (defun my/send-notification (title msg)
@@ -577,6 +648,77 @@
 (add-hook 'org-timer-done-hook (lambda () (my/send-notification "Org Mode" "It’s about time!")))
 
 
-(add-hook 'vterm-mode-hook #'(lambda () (boon-set-insert-state)))
+(setq load-path (cons "~/Developer/tidal/" load-path))
+(require 'haskell-mode)
+(require 'tidal)
+
+(setq tidal-boot-script-path "~/.cabal/share/aarch64-osx-ghc-9.6.1/tidal-1.9.4/BootTidal.hs")
+
+(use-package dante
+  :ensure t
+  :after haskell-mode
+  :commands 'dante-mode
+  :init
+  (add-hook 'haskell-mode-hook 'dante-mode)
+  
+  (add-hook 'haskell-mode-hook 'flymake-mode)
+  )
+
+(setq flymake-mode-line-lighter t)
 
 
+(setq dictionary-server "dict.org")
+
+(setq chatgpt-shell-openai-key ""
+      chatgpt-shell-model-version "gpt-3.5-turbo")
+
+(setq send-mail-function 'sendmail-query-once)
+
+(set-face-attribute 'variable-pitch nil :font "Lexia-15") ; mu4e
+
+;; (defun mu4e-alert-default-mode-line-formatter (mail-count)
+;;   "Default formatter used to get the string to be displayed in the mode-line.
+;; MAIL-COUNT is the count of mails for which the string is to displayed."
+;;   (when (not (zerop mail-count))
+;;     (concat " "
+;;             (propertize
+;;              "Mail"
+;;              'display (when (display-graphic-p)
+;;                         display-time-mail-string)  ;; this is the only change!
+;;              'face display-time-mail-face
+;;              'help-echo (concat (if (= mail-count 1)
+;;                                     "You have an unread email"
+;;                                   (format "You have %s unread emails" mail-count))
+;;                                 "\nClick here to view "
+;;                                 (if (= mail-count 1) "it" "them"))
+;;              'mouse-face 'mode-line-highlight
+;;              'keymap '(mode-line keymap
+;;                                  (mouse-1 . mu4e-alert-view-unread-mails)
+;;                                  (mouse-2 . mu4e-alert-view-unread-mails)
+;;                                  (mouse-3 . mu4e-alert-view-unread-mails)))
+;;             (if (zerop mail-count)
+;;                 " "
+;;               (format "{%d} " mail-count)))))
+
+;; (setq mu4e-alert-interesting-mail-query
+;;       (concat
+;;        "maildir:"
+;;        "\"/gu/backlog\""
+;;        "OR maildir:"
+;;        "\"/Talkamatic/tala-backlog\""
+;; ))
+;; (add-hook 'after-init-hook #'mu4e-alert-enable-mode-line-display)
+
+(setq-default indent-tabs-mode nil)
+
+(defun org-latex-timestamp (timestamp _contents info)
+  (format-time-string
+   "%Y-%m-%d"
+   (org-read-date nil t (org-timestamp-translate timestamp))))
+
+(diminish 'apheleia-mode " Aφ")
+(diminish 'overwrite-mode " ow")
+
+(set-fringe-mode 10)
+
+(setq org-drill-learn-fraction 0.42)
