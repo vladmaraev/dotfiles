@@ -1,4 +1,4 @@
-{ config, pkgs, stdenv,  ... }:
+{ config, pkgs, stdenv, lib,  ... }:
 
 let
   # emacs-overlay = fetchTarball {
@@ -14,7 +14,14 @@ in
   # paths it should manage.
   home.username = "xmarvl";
   home.homeDirectory = "/Users/xmarvl";
-  
+  home.language = {
+    base = "en_US";
+  };
+
+  home.sessionVariables = {
+    EDITOR = "emacsclient";
+  };
+
   home.file = {
     ".emacs" = {
       source = programs/emacs/emacs;
@@ -37,12 +44,13 @@ in
     ".mailcap" = {
       source = programs/mailcap/mailcap;
     };
-
     # ".agda/defaults" = {
     #   source = programs/agda/defaults;
     # };
   };
 
+
+    
   launchd.enable = true;
   launchd.agents = {
     mbsync = {
@@ -237,7 +245,7 @@ in
       inkscape
       ledger
       ltex-ls
-      nodejs nodePackages.yarn nodePackages.prettier nodePackages.typescript nodePackages.typescript-language-server nodePackages.sass nodePackages.vscode-langservers-extracted nodePackages.gatsby-cli
+      nodejs nodePackages.yarn nodePackages.prettier nodePackages.typescript nodePackages.typescript-language-server nodePackages.sass nodePackages.vscode-langservers-extracted nodePackages.gatsby-cli 
       openssl
       omnisharp-roslyn
       pass
@@ -245,7 +253,9 @@ in
       perl
       pinentry
       php
+      plantuml
       python-stuff
+      redis
       # haskell-packages
       terminal-notifier
       tex
@@ -398,7 +408,7 @@ in
       imap.host = "outlook.office365.com";
       imap.tls.certificatesFile = ~/.cert/outlook.office365.com.pem;
       mbsync = {
-        enable = true;
+        enable = false;
         create = "maildir";
         expunge = "both";
         extraConfig.account = {
@@ -434,7 +444,6 @@ in
     };
     initExtra = ''
                export XDG_CONFIG_HOME=$HOME/.config
-               export EDITOR="emacsclient"  
                vterm_printf() {
                    if [ -n "$TMUX" ] && ([ "''${TERM%%-*}" = "tmux" ] || [ "''${TERM%%-*}" = "screen" ]); then
         # Tell tmux to pass the escape sequences through

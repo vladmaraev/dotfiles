@@ -19,7 +19,7 @@
 
 (setq mac-option-key-is-meta t)
 (setq mac-command-key-is-meta nil)
-(setq mac-command-modifier 'control)
+(setq mac-command-modifier 'super)
 (setq mac-option-modifier 'meta)
 (setq mac-right-option-modifier nil)
 (setq mac-left-command-modifier nil)
@@ -377,7 +377,7 @@
          :map minibuffer-local-map
          ("M-b" . citar-insert-preset))
   :custom
-  (org-cite-global-bibliography '("~/org/library/library.bib"))
+  (org-cite-global-bibliography '())
   (org-cite-insert-processor 'citar)
   (org-cite-follow-processor 'citar)
   (org-cite-activate-processor 'citar)
@@ -461,7 +461,7 @@ https://blog.jmthornton.net/p/emacs-project-override"
 
 
 (setq mu4e-get-mail-command "mbsync -a"
-      mu4e-update-interval 120
+      mu4e-update-interval 60
       mu4e-index-update-in-background t
       mu4e-hide-index-messages t)
 
@@ -585,7 +585,7 @@ https://blog.jmthornton.net/p/emacs-project-override"
  mu4e-compose-signature
  (concat "Vladislav Maraev\n"
 	 "Postdoctoral researcher\n\n"
-	 "Dept. of Applied IT, Division of Cognition & Communication\n"
+	 "Department of Philosophy, Linguistics and Theory of Science\n"
 	 "University of Gothenburg"))
 (setq mu4e-compose-signature-auto-include nil)
 
@@ -722,3 +722,20 @@ https://blog.jmthornton.net/p/emacs-project-override"
 (set-fringe-mode 10)
 
 (setq org-drill-learn-fraction 0.42)
+
+(add-to-list 'org-latex-classes
+                   '("memoir"
+                     "\\documentclass{memoir}
+   [NO-DEFAULT-PACKAGES]
+   [PACKAGES]
+   [EXTRA]
+  \\newcommand{\\mboxparagraph}[1]{\\paragraph{#1}\\mbox{}\\\\\\noindent}
+  \\newcommand{\\mboxsubparagraph}[1]{\\subparagraph{#1}\\mbox{}\\\\\\noindent}"
+                     ("\\part{%s}" . "\\part*{%s}")
+                     ("\\chapter{%s}" . "\\chapter*{%s}")
+                     ("\\section{%s}" . "\\section*{%s}")
+                     ("\\subsection{%s}" . "\\subsection*{%s}")
+                     ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                     ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                     ("\\subparagraph{%s}" . "\\subparagraph*{%s}")
+		     ))
